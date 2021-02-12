@@ -1,4 +1,5 @@
 # Checking CI trigger
+# Checking CI trigger 2
 ---
 page_type: sample
 languages:
