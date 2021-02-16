@@ -1,6 +1,4 @@
-# Checking CI trigger
-# Checking CI trigger 
-# Checking CI trigger 3
+# Checking PR
 ---
 page_type: sample
 languages:
