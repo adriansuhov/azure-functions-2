@@ -26,8 +26,17 @@ resources:
         - main
 
 stages:
+- stage: TestPipeline
+  jobs:
+  - job:
+    steps:
+    - powershell: |
+        Write-Host $(Build.Reason)
+        Write-Host $(Build.SourceBranch)
+
+
 - stage: UnitTests
-  condition: and(succeeded(), eq(variables.isPR, true))
+  condition: eq(variables.isPR, true)
   displayName: "Unit Test"
   jobs:
   - job:
@@ -35,7 +44,7 @@ stages:
       - script: echo Hello Stage Unit Tests!
 
 - stage: Deploy
-  condition: and(succeeded(), eq(variables.isMain, true))
+  condition: eq(variables.isMain, true)
   displayName: "Deploy Azure Function"
   jobs:
   - job:
@@ -43,7 +52,7 @@ stages:
       - script: echo Hello Stage Deploy!
 
 - stage: FunctionalTests
-  condition: and(succeeded(), eq(variables.isMain, true))
+  condition: eq(variables.isMain, true)
   displayName: "Run Functional Test Automation"
   jobs:
   - job:
