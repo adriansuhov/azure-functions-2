@@ -9,6 +9,18 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+resources:
+  repositories:
+  - repository: EZWM
+    type: github
+    endpoint: adriansuhov
+    name: adriansuhov/azure-devops
+    trigger:
+      batch: true
+      branches:
+        include:
+        - main
+
 steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
