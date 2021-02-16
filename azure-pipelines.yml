@@ -6,12 +6,16 @@
 trigger:
 - main
 
+variables:
+  isPR: $[eq(variables['Build.Reason'], 'PullRequest')]
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+
 pool:
   vmImage: ubuntu-latest
 
 resources:
   repositories:
-  - repository: EZWM
+  - repository: TestAutomation
     type: github
     endpoint: adriansuhov
     name: adriansuhov/azure-devops
@@ -21,6 +25,27 @@ resources:
         include:
         - main
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
+- stage: UnitTests
+  condition: and(succeeded(), eq(variables.isPR, true))
+  displayName: "Unit Test"
+  jobs:
+  - job:
+    steps:
+      - script: echo Hello Stage Unit Tests!
+
+- stage: Deploy
+  condition: and(succeeded(), eq(variables.isMain, true))
+  displayName: "Deploy Azure Function"
+  jobs:
+  - job:
+    steps:
+      - script: echo Hello Stage Deploy!
+
+- stage: FunctionalTests
+  condition: and(succeeded(), eq(variables.isMain, true))
+  displayName: "Run Functional Test Automation"
+  jobs:
+  - job:
+    steps:
+      - script: echo Hello Stage Functional Tests!
