@@ -71,7 +71,7 @@ stages:
         azureSubscription: 'AzFun_SC'
         appType: 'functionApp'
         appName: 'adsuho-f2'
-        package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+        package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip'
         deploymentMethod: 'auto'
   
 - stage: FunctionalTests
