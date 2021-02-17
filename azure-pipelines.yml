@@ -63,9 +63,16 @@ stages:
       inputs:
         command: 'publish'
         projects: '**/*.csproj'
-        publishWebProjects: false
+        publishWebProjects: true
         arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
         zipAfterPublish: true
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: 'AzFun_SC'
+        appType: 'functionApp'
+        appName: 'adsuho-f2'
+        package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+        deploymentMethod: 'auto'
   
 - stage: FunctionalTests
   condition: and(succeeded('Deploy'), eq(variables.isMain, true))
