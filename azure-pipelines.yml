@@ -38,7 +38,7 @@ stages:
     - task: DotNetCoreCLI@2
       inputs:
         command: 'test'
-        projects: '**/DotNet/DotNet.Test/DotNet.Test.csproj'
+        projects: '**/*.Test.csproj'
 
 - stage: Deploy
   condition: eq(variables.isMain, true)
