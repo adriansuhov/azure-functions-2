@@ -11,7 +11,7 @@ variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 resources:
   repositories:
@@ -32,7 +32,13 @@ stages:
   jobs:
   - job:
     steps:
-      - script: echo Hello Stage Unit Tests!
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '**/*.sln'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'test'
+        projects: '**/DotNet/DotNet.Test/DotNet.Test.csproj'
 
 - stage: Deploy
   condition: eq(variables.isMain, true)
