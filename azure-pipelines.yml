@@ -30,7 +30,7 @@ stages:
   condition: eq(variables.isPR, true)
   displayName: "Unit Test"
   jobs:
-  - job:
+  - job: UnitTests
     steps:
     - task: NuGetCommand@2
       inputs:
@@ -44,7 +44,7 @@ stages:
   condition: eq(variables.isMain, true)
   displayName: "Deploy Azure Function"
   jobs:
-  - job:
+  - job: Deploy
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Restore project dependencies'
@@ -53,9 +53,9 @@ stages:
         projects: '**/*.csproj'
 
 - stage: FunctionalTests
-  condition: and(succeeded(), eq(variables.isMain, true))
+  condition: and(succeeded(Deploy), eq(variables.isMain, true))
   displayName: "Run Functional Test Automation"
   jobs:
-  - job:
+  - job: FunctionalTests
     steps:
       - script: echo Hello Stage Functional Tests!
