@@ -53,7 +53,7 @@ stages:
         projects: '**/*.csproj'
 
 - stage: FunctionalTests
-  condition: and(succeeded(Deploy), eq(variables.isMain, true))
+  condition: and(succeeded('Deploy'), eq(variables.isMain, true))
   displayName: "Run Functional Test Automation"
   jobs:
   - job: FunctionalTests
