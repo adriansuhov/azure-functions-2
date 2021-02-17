@@ -1,88 +1,49 @@
-# Checking CI trigger
-# Checking CI trigger 
-# Checking CI trigger 3
----
-page_type: sample
-languages:
-- java
-products:
-- azure functions
-description: "This repository contains sample for Azure Functions in Java"
-urlFragment: "azure-functions-java"
----
 
-# Azure Functions example in Java
 
-This sample show a basis usage for how to use *http-trigger* for [Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) in Java.
+# Azure Functions / Durable Functions Unit Testing Sample
 
-## Contents
+Azure Functions Unit Testing Samples for V2 Functions.
 
-Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
+## Features
 
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `src`             | Sample source code.                        |
-| `.gitignore`      | Define what to ignore at commit time.      |
-| `build.gradle`    | The gradle configuration to this sample.   |
-| `pom.xml`         | The maven configuration to this sample.   |
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md`       | This README file.                          |
-| `LICENSE.txt`         | The license for the sample.                |
+The sample provides the following samples:
 
-## Prerequisites
+* HttpTrigger
+* QueueTrigger
+* Table Output bindings
+* Durable Functions
 
-- Gradle 4.10+
-- Latest [Function Core Tools](https://aka.ms/azfunc-install)
-- Azure CLI. This plugin use Azure CLI for authentication, please make sure you have Azure CLI installed and logged in.
+You can refer how to mock the apps. Also, you can re-use FunctionTestHelper package.
 
-## Setup
+We try to increase the samples, EventGridTrigger, EventHubTrigger, ServiceBus... and so on.
 
-```cmd
-az login
-az account set -s <your subscription id>
+## Getting Started
+
+### 1. Clone this samples
+
+Clone this repo with your Visual Studo. 
+
+```
+git clone https://github.com/Azure-Samples/functions-unittesting-sample.git
 ```
 
-## Running the sample
+### Prerequisites
 
-```cmd
-./mvnw clean package azure-functions:run
-```
-
-```cmd
-./gradlew clean azureFunctionsRun
-```
-
-## Deploy the sample on Azure
+Visual Studio 2017 (15.6+)
+.Net Core Runtime 
 
 
-```cmd
-./mvnw clean package azure-functions:deploy
-```
+### Note
 
-```cmd
-./gradlew clean azureFunctionsDeploy
-```
+For enabling Durable Functions Unit Testing feature, you need to upgrade nuget packages. 
 
-> NOTE: please replace '/' with '\\' when you are running on windows.
+* Microsoft.NET.Sdk.Functions v1.0.7
+* Microsoft.Azure.WebJobs.Extensions.DurableTask v1.1.1-beta2
+
+You might need to add `https://www.myget.org/F/azure-appservice/api/v3/index.json` as a nuget package sources for fetching the DurableTask v1.1.1-beta2
 
 
-## Contributing
+## Resources
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+Coming soon
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## Telemetry
-This project collects usage data and sends it to Microsoft to help improve our products and services.
-Read Microsoft's [privacy statement](https://privacy.microsoft.com/en-us/privacystatement) to learn more.
-If you would like to opt out of sending telemetry data to Microsoft, you can set `allowTelemetry` to false in the plugin configuration.
-Please read our [document](https://github.com/microsoft/azure-gradle-plugins/wiki/Configuration) to find more details about *allowTelemetry*.

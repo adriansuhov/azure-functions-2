@@ -26,15 +26,6 @@ resources:
         - main
 
 stages:
-- stage: TestPipeline
-  jobs:
-  - job:
-    steps:
-    - powershell: |
-        Write-Host $(Build.Reason)
-        Write-Host $(Build.SourceBranch)
-
-
 - stage: UnitTests
   condition: eq(variables.isPR, true)
   displayName: "Unit Test"
