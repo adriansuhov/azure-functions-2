@@ -46,7 +46,11 @@ stages:
   jobs:
   - job:
     steps:
-      - script: echo Hello Stage Deploy!
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
 
 - stage: FunctionalTests
   condition: eq(variables.isMain, true)
