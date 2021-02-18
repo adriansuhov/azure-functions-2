@@ -47,32 +47,43 @@ stages:
   - job: Deploy
     displayName: 'Deploy Azure Function'
     steps:
-    - task: DotNetCoreCLI@2
-      displayName: 'Restore project dependencies'
+    # - task: DotNetCoreCLI@2
+    #   displayName: 'Restore project dependencies'
+    #   inputs:
+    #     command: 'restore'
+    #     projects: '**/*.csproj'
+    # - task: DotNetCoreCLI@2
+    #   displayName: 'Build the project - $(buildConfiguration)'
+    #   inputs:
+    #     command: 'build'
+    #     arguments: '--no-restore --configuration $(buildConfiguration)'
+    #     projects: '**/*.csproj'
+    # - task: DotNetCoreCLI@2
+    #   displayName: 'Publish the project - $(buildConfiguration)'
+    #   inputs:
+    #     command: 'publish'
+    #     projects: '**/*.csproj'
+    #     publishWebProjects: false
+    #     arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+    #     zipAfterPublish: true
+    # - task: AzureFunctionApp@1
+    #   inputs:
+    #     azureSubscription: 'AzFun_SC'
+    #     appType: 'functionApp'
+    #     appName: 'adsuho-f2'
+    #     package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip'
+    #     deploymentMethod: 'auto'
+    - task: SendEmail@1
       inputs:
-        command: 'restore'
-        projects: '**/*.csproj'
-    - task: DotNetCoreCLI@2
-      displayName: 'Build the project - $(buildConfiguration)'
-      inputs:
-        command: 'build'
-        arguments: '--no-restore --configuration $(buildConfiguration)'
-        projects: '**/*.csproj'
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish the project - $(buildConfiguration)'
-      inputs:
-        command: 'publish'
-        projects: '**/*.csproj'
-        publishWebProjects: false
-        arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
-        zipAfterPublish: true
-    - task: AzureFunctionApp@1
-      inputs:
-        azureSubscription: 'AzFun_SC'
-        appType: 'functionApp'
-        appName: 'adsuho-f2'
-        package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip'
-        deploymentMethod: 'auto'
+        To: 'adrian.suhov@softvision.com'
+        From: 'adrian.suhov@gilead.com'
+        Subject: 'Function App File'
+        Body: |
+          Hello,
+          $(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip has been uploaded!
+          Please check it out!
+        BodyAsHtml: false
+        AddAttachment: false
   
 - stage: FunctionalTests
   condition: and(succeeded('Deploy'), eq(variables.isMain, true))
