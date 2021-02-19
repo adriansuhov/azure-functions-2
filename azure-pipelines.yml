@@ -7,8 +7,11 @@ trigger:
 - main
 
 variables:
-  isPR: $[eq(variables['Build.Reason'], 'PullRequest')]
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+- group: SecureVars
+- name: isPR
+  value: $[eq(variables['Build.Reason'], 'PullRequest')]
+- name: isMain
+  value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 pool:
   vmImage: windows-latest
@@ -47,6 +50,14 @@ stages:
   - job: Deploy
     displayName: 'Deploy Azure Function'
     steps:
+    - pwsh: |
+        Write-Host $(azureStorageName)
+        Write-Host $(azureSub)
+        Write-Host $(sourceLocation)
+        Write-Host $(isPR)
+        Write-Host $(isMain)
+        Write-Host "--------------"
+        dir env:
     # - task: DotNetCoreCLI@2
     #   displayName: 'Restore project dependencies'
     #   inputs:
@@ -73,17 +84,6 @@ stages:
     #     appName: 'adsuho-f2'
     #     package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip'
     #     deploymentMethod: 'auto'
-    - task: SendEmail@1
-      inputs:
-        To: 'adrian.suhov@softvision.com'
-        From: 'adrian.suhov@gilead.com'
-        Subject: 'Function App File'
-        Body: |
-          Hello,
-          $(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip has been uploaded!
-          Please check it out!
-        BodyAsHtml: false
-        AddAttachment: false
   
 - stage: FunctionalTests
   condition: and(succeeded('Deploy'), eq(variables.isMain, true))
