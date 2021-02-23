@@ -40,6 +40,8 @@ stages:
     #   inputs:
     #     version: '5.0.x'
     #     includePreviewVersions: true
+    - script: 'dotnet tool install --global dotnet-reportgenerator-globaltool'
+      displayName: 'Install ReportGenerator tool' 
     - task: DotNetCoreCLI@2
       displayName: 'Restore project dependencies'
       inputs:
