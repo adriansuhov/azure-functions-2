@@ -3,15 +3,14 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- main
+trigger: none
 
 variables:
 - group: SecureVars
-- name: isPR
-  value: $[eq(variables['Build.Reason'], 'PullRequest')]
+- name: isDevelop
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/develop')]
 - name: isMain
-  value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/main')]
 
 pool:
   vmImage: windows-latest
@@ -30,7 +29,7 @@ resources:
 
 stages:
 - stage: UnitTests
-  condition: eq(variables.isPR, true)
+  # condition: eq(variables.isPR, true)
   displayName: "Unit Test"
   jobs:
   - job: UnitTests
@@ -44,17 +43,18 @@ stages:
         projects: '**/*.Test.csproj'
 
 - stage: Deploy
-  condition: eq(variables.isMain, true)
+  # condition: eq(variables.isMain, true)
   displayName: "Deploy Azure Function"
   jobs:
   - job: Deploy
     displayName: 'Deploy Azure Function'
     steps:
     - pwsh: |
+        Write-Host $(System.PullRequest.TargetBranch) 
         Write-Host $(azureStorageName)
         Write-Host $(azureSub)
         Write-Host $(sourceLocation)
-        Write-Host $(isPR)
+        Write-Host $(isDevelop)
         Write-Host $(isMain)
         Write-Host "--------------"
         dir env:
@@ -86,7 +86,7 @@ stages:
     #     deploymentMethod: 'auto'
   
 - stage: FunctionalTests
-  condition: and(succeeded('Deploy'), eq(variables.isMain, true))
+  # condition: and(succeeded('Deploy'), eq(variables.isMain, true))
   displayName: 'Run Functional Test Automation'
   jobs:
   - job: FunctionalTests
