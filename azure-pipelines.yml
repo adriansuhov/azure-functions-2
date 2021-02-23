@@ -28,12 +28,12 @@ resources:
         - main
 
 stages:
-- stage: UnitTests
-  # condition: eq(variables.isDevelop, true)
+- stage: BuildAndTest
   displayName: "Build & Test"
   jobs:
-  - job: UnitTests
-    displayName: "Build & Test" 
+  - job: TestEnv
+    displayName: "Test Environment"
+    condition: eq(variables.isDevelop, true)
     steps:
     # Set up dependencies
     # - task: UseDotNet@2
@@ -59,6 +59,27 @@ stages:
         command: 'test'
         projects: '**/*.Test.csproj'
 
+    # Publish build
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish the project - $(buildConfiguration)'
+      inputs:
+        command: 'publish'
+        projects: '**/*.csproj'
+        publishWebProjects: false
+        arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+        zipAfterPublish: true
+    - publish: $(Build.ArtifactStagingDirectory)/$(buildConfiguration)
+      artifact: WebApp
+  - job: ProdEnv
+    displayName: "Production Environment"
+    condition: eq(variables.isMain, true)
+    steps:
+    # Set up dependencies
+    - task: UseDotNet@2
+      inputs:
+        version: '5.0.x'
+        includePreviewVersions: true
+
 - stage: Deploy
   condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: "Deploy Azure Function"
@@ -75,15 +96,6 @@ stages:
         Write-Host $(isMain)
         Write-Host "--------------"
         dir env:
-
-    # - task: DotNetCoreCLI@2
-    #   displayName: 'Publish the project - $(buildConfiguration)'
-    #   inputs:
-    #     command: 'publish'
-    #     projects: '**/*.csproj'
-    #     publishWebProjects: false
-    #     arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
-    #     zipAfterPublish: true
     # - task: AzureFunctionApp@1
     #   inputs:
     #     azureSubscription: 'AzFun_SC'
@@ -91,7 +103,7 @@ stages:
     #     appName: 'adsuho-f2'
     #     package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip'
     #     deploymentMethod: 'auto'
-  
+
 - stage: FunctionalTests
   condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: 'Run Functional Test Automation'
