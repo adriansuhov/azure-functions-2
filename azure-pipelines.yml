@@ -8,9 +8,9 @@ trigger: none
 variables:
 - group: SecureVars
 - name: isDevelop
-  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/develop')]
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'develop')]
 - name: isMain
-  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/main')]
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'main')]
 
 pool:
   vmImage: windows-latest
@@ -29,21 +29,38 @@ resources:
 
 stages:
 - stage: UnitTests
-  # condition: eq(variables.isPR, true)
-  displayName: "Unit Test"
+  # condition: eq(variables.isDevelop, true)
+  displayName: "Build & Test"
   jobs:
   - job: UnitTests
+    displayName: "Build & Test" 
     steps:
-    - task: NuGetCommand@2
+    # Set up dependencies
+    - task: UseDotNet@2
       inputs:
-        restoreSolution: '**/*.sln'
+        version: '5.0.x'
+        includePreviewVersions: true
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    # Build project
+    - task: DotNetCoreCLI@2
+      displayName: 'Build the project - $(buildConfiguration)'
+      inputs:
+        command: 'build'
+        arguments: '--no-restore --configuration $(buildConfiguration)'
+        projects: '**/*.csproj'
+    # Run Unit Tests
     - task: DotNetCoreCLI@2
       inputs:
         command: 'test'
         projects: '**/*.Test.csproj'
 
 - stage: Deploy
-  # condition: eq(variables.isMain, true)
+  condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: "Deploy Azure Function"
   jobs:
   - job: Deploy
@@ -58,17 +75,7 @@ stages:
         Write-Host $(isMain)
         Write-Host "--------------"
         dir env:
-    # - task: DotNetCoreCLI@2
-    #   displayName: 'Restore project dependencies'
-    #   inputs:
-    #     command: 'restore'
-    #     projects: '**/*.csproj'
-    # - task: DotNetCoreCLI@2
-    #   displayName: 'Build the project - $(buildConfiguration)'
-    #   inputs:
-    #     command: 'build'
-    #     arguments: '--no-restore --configuration $(buildConfiguration)'
-    #     projects: '**/*.csproj'
+
     # - task: DotNetCoreCLI@2
     #   displayName: 'Publish the project - $(buildConfiguration)'
     #   inputs:
@@ -86,7 +93,7 @@ stages:
     #     deploymentMethod: 'auto'
   
 - stage: FunctionalTests
-  # condition: and(succeeded('Deploy'), eq(variables.isMain, true))
+  condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: 'Run Functional Test Automation'
   jobs:
   - job: FunctionalTests
