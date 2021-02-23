@@ -59,7 +59,7 @@ stages:
       inputs:
         command: 'test'
         projects: '**/*.Test.csproj'
-        arguments: '--configuration ${{ parameters.BuildConfiguration }} /p:CollectCoverage=true /p:IncludeTestAssembly=false /p:CoverletOutputFormat=json%2copencover%2ccobertura /p:CoverletOutput=../target/reports/coverage/ /p:MergeWith=../target/reports/coverage/coverage.json'
+        arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:IncludeTestAssembly=false /p:CoverletOutputFormat=json%2copencover%2ccobertura /p:CoverletOutput=../target/reports/coverage/ /p:MergeWith=../target/reports/coverage/coverage.json'
     - script: 'reportgenerator -reports:$(Build.SourcesDirectory)\target\reports\coverage\coverage.opencover.xml -targetdir:$(Build.SourcesDirectory)\target\reports\coverage -reporttypes:"HtmlInline_AzurePipelines;Cobertura;Badges" -assemblyfilters:"-xunit*"' 
       displayName: 'Create reports'  
     - task: PublishCodeCoverageResults@1
