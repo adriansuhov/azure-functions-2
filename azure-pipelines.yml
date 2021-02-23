@@ -32,7 +32,7 @@ stages:
   displayName: "Build & Test"
   jobs:
   - job: TestEnv
-    displayName: "Test Environment"
+    displayName: "Develop"
     condition: eq(variables.isDevelop, true)
     steps:
     # Set up dependencies
@@ -69,16 +69,14 @@ stages:
         arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
         zipAfterPublish: true
     - publish: $(Build.ArtifactStagingDirectory)/$(buildConfiguration)
-      artifact: WebApp
+      artifact: $(Build.DefinitionName)
+
   - job: ProdEnv
-    displayName: "Production Environment"
+    displayName: "Master"
     condition: eq(variables.isMain, true)
     steps:
     # Set up dependencies
-    - task: UseDotNet@2
-      inputs:
-        version: '5.0.x'
-        includePreviewVersions: true
+    - script: echo Hello Stage Build & Test!
 
 - stage: Deploy
   condition: and(succeeded(), eq(variables.isDevelop, true))
