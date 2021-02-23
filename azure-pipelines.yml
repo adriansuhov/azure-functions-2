@@ -83,19 +83,12 @@ stages:
   displayName: "Deploy Azure Function"
   jobs:
   - job: Deploy
-    displayName: 'Deploy Azure Function in Test Env'
+    displayName: 'Test Environment'
     steps:
+    # Downloading the build
     - download: current
       artifact: $(Build.DefinitionName)
-    - pwsh: |
-        Write-Host $(System.PullRequest.TargetBranch) 
-        Write-Host $(azureStorageName)
-        Write-Host $(azureSub)
-        Write-Host $(sourceLocation)
-        Write-Host $(isDevelop)
-        Write-Host $(isMain)
-        Write-Host "--------------"
-        dir env:
+    # Deploying the function into Test Environment
     - task: AzureFunctionApp@1
       inputs:
         azureSubscription: 'AzFun_SC'
@@ -109,5 +102,17 @@ stages:
   displayName: 'Run Functional Test Automation'
   jobs:
   - job: FunctionalTests
+    displayName: "Test Environment"
     steps:
-      - script: echo Hello Stage Functional Tests!
+      - checkout: TestAutomation
+      - task: Maven@3
+        inputs:
+          mavenPomFile: 'pom.xml'
+          goals: 'test'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          mavenVersionOption: 'Default'
+          mavenAuthenticateFeed: false
+          effectivePomSkip: false
+          sonarQubeRunAnalysis: false
