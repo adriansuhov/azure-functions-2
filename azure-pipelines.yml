@@ -83,8 +83,10 @@ stages:
   displayName: "Deploy Azure Function"
   jobs:
   - job: Deploy
-    displayName: 'Deploy Azure Function'
+    displayName: 'Deploy Azure Function in Test Env'
     steps:
+    - download: current
+      artifact: $(Build.DefinitionName)
     - pwsh: |
         Write-Host $(System.PullRequest.TargetBranch) 
         Write-Host $(azureStorageName)
@@ -94,13 +96,13 @@ stages:
         Write-Host $(isMain)
         Write-Host "--------------"
         dir env:
-    # - task: AzureFunctionApp@1
-    #   inputs:
-    #     azureSubscription: 'AzFun_SC'
-    #     appType: 'functionApp'
-    #     appName: 'adsuho-f2'
-    #     package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/DotNet.zip'
-    #     deploymentMethod: 'auto'
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: 'AzFun_SC'
+        appType: 'functionApp'
+        appName: 'adsuho-f2'
+        package: '$(Pipeline.Workspace)/$(Build.DefinitionName)/DotNet.zip'
+        deploymentMethod: 'auto'
 
 - stage: FunctionalTests
   condition: and(succeeded(), eq(variables.isDevelop, true))
