@@ -31,7 +31,7 @@ stages:
 - stage: BuildAndTest
   displayName: "Build & Test"
   jobs:
-  - job: TestEnv
+  - job: Develop
     displayName: "Develop"
     condition: eq(variables.isDevelop, true)
     steps:
@@ -58,6 +58,7 @@ stages:
       inputs:
         command: 'test'
         projects: '**/*.Test.csproj'
+        arguments: '--collect "Code coverage"'
 
     # Publish build
     - task: DotNetCoreCLI@2
@@ -78,26 +79,26 @@ stages:
     # Set up dependencies
     - script: echo Hello Stage Build & Test!
 
-- stage: Deploy
-  condition: and(succeeded(), eq(variables.isDevelop, true))
-  displayName: "Deploy Azure Function"
-  jobs:
-  - job: Deploy
-    displayName: 'Test Environment'
-    steps:
-    # Downloading the build
-    - download: current
-      artifact: $(Build.DefinitionName)
-    # Deploying the function into Test Environment
-    - task: AzureFunctionApp@1
-      inputs:
-        azureSubscription: 'AzFun_SC'
-        appType: 'functionApp'
-        appName: 'adsuho-f2'
-        package: '$(Pipeline.Workspace)/$(Build.DefinitionName)/DotNet.zip'
-        deploymentMethod: 'auto'
+# - stage: Deploy
+#   condition: and(succeeded(), eq(variables.isDevelop, true))
+#   displayName: "Deploy Azure Function"
+#   jobs:
+#   - job: Deploy
+#     displayName: 'Test Environment'
+#     steps:
+#     # Downloading the build
+#     - download: current
+#       artifact: $(Build.DefinitionName)
+#     # Deploying the function into Test Environment
+#     - task: AzureFunctionApp@1
+#       inputs:
+#         azureSubscription: 'AzFun_SC'
+#         appType: 'functionApp'
+#         appName: 'adsuho-f2'
+#         package: '$(Pipeline.Workspace)/$(Build.DefinitionName)/DotNet.zip'
+#         deploymentMethod: 'auto'
 
-- stage: FunctionalTests
+# - stage: FunctionalTests
   condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: 'Run Functional Test Automation'
   jobs:
