@@ -40,8 +40,6 @@ stages:
     #   inputs:
     #     version: '5.0.x'
     #     includePreviewVersions: true
-    - script: 'dotnet tool install --global dotnet-reportgenerator-globaltool'
-      displayName: 'Install ReportGenerator tool' 
     - task: DotNetCoreCLI@2
       displayName: 'Restore project dependencies'
       inputs:
@@ -62,16 +60,6 @@ stages:
         command: 'test'
         projects: '**/*.Test.csproj'
         arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:IncludeTestAssembly=false /p:CoverletOutputFormat=json%2copencover%2ccobertura /p:CoverletOutput=../target/reports/coverage/ /p:MergeWith=../target/reports/coverage/coverage.json'
-    - script: 'reportgenerator -reports:$(Build.SourcesDirectory)\target\reports\coverage\coverage.opencover.xml -targetdir:$(Build.SourcesDirectory)\target\reports\coverage -reporttypes:"HtmlInline_AzurePipelines;Cobertura;Badges" -assemblyfilters:"-xunit*"' 
-      displayName: 'Create reports'  
-    - task: PublishCodeCoverageResults@1
-      displayName: 'Publish code coverage report'
-      inputs:
-        codeCoverageTool: 'Cobertura'
-        summaryFileLocation: '$(Build.SourcesDirectory)\target\reports\coverage\coverage.cobertura.xml'
-        reportDirectory: '$(Build.SourcesDirectory)\target\reports\coverage'
-        pathToSources: '$(Build.SourcesDirectory)'
-        failIfCoverageEmpty: false
 
     # Publish build
     - task: DotNetCoreCLI@2
@@ -92,70 +80,70 @@ stages:
     # Set up dependencies
     - script: echo Hello Stage Build & Test!
 
-# - stage: Deploy
-#   condition: and(succeeded(), eq(variables.isDevelop, true))
-#   displayName: "Deploy Azure Function"
-#   jobs:
-#   - job: Deploy
-#     displayName: 'Test Environment'
-#     steps:
-#     # Downloading the build
-#     - download: current
-#       artifact: $(Build.DefinitionName)
-#     # Deploying the function into Test Environment
-#     - task: AzureFunctionApp@1
-#       inputs:
-#         azureSubscription: 'AzFun_SC'
-#         appType: 'functionApp'
-#         appName: 'adsuho-f2'
-#         package: '$(Pipeline.Workspace)/$(Build.DefinitionName)/DotNet.zip'
-#         deploymentMethod: 'auto'
+- stage: Deploy
+  condition: and(succeeded(), eq(variables.isDevelop, true))
+  displayName: "Deploy Azure Function"
+  jobs:
+  - job: Deploy
+    displayName: 'Test Environment'
+    steps:
+    # Downloading the build
+    - download: current
+      artifact: $(Build.DefinitionName)
+    # Deploying the function into Test Environment
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: 'AzFun_SC'
+        appType: 'functionApp'
+        appName: 'adsuho-f2'
+        package: '$(Pipeline.Workspace)/$(Build.DefinitionName)/DotNet.zip'
+        deploymentMethod: 'auto'
 
-# - stage: FunctionalTests
-#   condition: and(succeeded(), eq(variables.isDevelop, true))
-#   displayName: 'Run Functional Test Automation'
-#   jobs:
-#   - job: FunctionalTests
-#     displayName: "Test Environment"
-#     steps:
-#       - checkout: TestAutomation
-#       - task: Maven@3
-#         inputs:
-#           mavenPomFile: 'pom.xml'
-#           goals: 'test'
-#           publishJUnitResults: true
-#           testResultsFiles: '**/surefire-reports/TEST-*.xml'
-#           javaHomeOption: 'JDKVersion'
-#           mavenVersionOption: 'Default'
-#           mavenAuthenticateFeed: false
-#           effectivePomSkip: false
-#           sonarQubeRunAnalysis: false
-#       - task: AzureFileCopy@3
-#         inputs:
-#           SourcePath: '$(sourceLocation)'
-#           azureSubscription: '$(azureSub)'
-#           Destination: 'AzureBlob'
-#           storage: '$(azureStorageName)'
-#           ContainerName: '$web'
-#           BlobPrefix: '$(Build.BuildNumber)'
+- stage: FunctionalTests
+  condition: and(succeeded(), eq(variables.isDevelop, true))
+  displayName: 'Run Functional Test Automation'
+  jobs:
+  - job: FunctionalTests
+    displayName: "Test Environment"
+    steps:
+      - checkout: TestAutomation
+      - task: Maven@3
+        inputs:
+          mavenPomFile: 'pom.xml'
+          goals: 'test'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          mavenVersionOption: 'Default'
+          mavenAuthenticateFeed: false
+          effectivePomSkip: false
+          sonarQubeRunAnalysis: false
+      - task: AzureFileCopy@3
+        inputs:
+          SourcePath: '$(sourceLocation)'
+          azureSubscription: '$(azureSub)'
+          Destination: 'AzureBlob'
+          storage: '$(azureStorageName)'
+          ContainerName: '$web'
+          BlobPrefix: '$(Build.BuildNumber)'
 
-#       - pwsh: |
-#           Write-Host "Storage account is $(azureStorageName)"
-#           $reportLocation = "https://" + "$(azureStorageName)" `
-#             + ".z6.web.core.windows.net/" + "$(Build.BuildNumber)" `
-#             + "/index.html"
-#           Write-Host "ReportLocation is $reportLocation"
+      - pwsh: |
+          Write-Host "Storage account is $(azureStorageName)"
+          $reportLocation = "https://" + "$(azureStorageName)" `
+            + ".z6.web.core.windows.net/" + "$(Build.BuildNumber)" `
+            + "/index.html"
+          Write-Host "ReportLocation is $reportLocation"
 
-#           curl "https://api.postmarkapp.com/email" `
-#             -X POST `
-#             -H "Accept: application/json" `
-#             -H "Content-Type: application/json" `
-#             -H "X-Postmark-Server-Token: $(PostmarkToken)" `
-#             -d "{ `
-#             'From': '$(PostmarkSender)', `
-#             'To': '$(PostmarkReceiver)', `
-#             'Subject': 'Convacloud Test Automation Results', `
-#             'TextBody': 'Test Automation run', `
-#             'HtmlBody': '<html><body>$(PostmarkBody)</body></html>',
-#             'MessageStream': 'outbound' `
-#             }"
+          curl "https://api.postmarkapp.com/email" `
+            -X POST `
+            -H "Accept: application/json" `
+            -H "Content-Type: application/json" `
+            -H "X-Postmark-Server-Token: $(PostmarkToken)" `
+            -d "{ `
+            'From': '$(PostmarkSender)', `
+            'To': '$(PostmarkReceiver)', `
+            'Subject': 'Convacloud Test Automation Results', `
+            'TextBody': 'Test Automation run', `
+            'HtmlBody': '<html><body>$(PostmarkBody)</body></html>',
+            'MessageStream': 'outbound' `
+            }"
