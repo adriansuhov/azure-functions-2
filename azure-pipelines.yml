@@ -83,6 +83,8 @@ stages:
 - stage: Deploy
   condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: "Deploy Azure Function"
+  variables:
+  - group: subscription_var
   jobs:
   - job: Deploy
     displayName: 'Test Environment'
@@ -93,7 +95,7 @@ stages:
     # Deploying the function into Test Environment
     - task: AzureFunctionApp@1
       inputs:
-        azureSubscription: 'AzFun_SC'
+        azureSubscription: '$(azureSubFunction)'
         appType: 'functionApp'
         appName: 'adsuho-f2'
         package: '$(Pipeline.Workspace)/$(Build.DefinitionName)/DotNet.zip'
@@ -102,6 +104,8 @@ stages:
 - stage: FunctionalTests
   condition: and(succeeded(), eq(variables.isDevelop, true))
   displayName: 'Run Functional Test Automation'
+  variables:
+  - group: subscription_var
   jobs:
   - job: FunctionalTests
     displayName: "Test Environment"
